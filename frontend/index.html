@@ -1,0 +1,1316 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NestJS E-Commerce</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #0a0a0f;
+        --surface: #111118;
+        --surface2: #1a1a24;
+        --border: #2a2a3a;
+        --accent: #6c63ff;
+        --accent2: #ff6584;
+        --accent3: #43e97b;
+        --text: #f0f0f8;
+        --muted: #6b6b8a;
+        --font-display: "Syne", sans-serif;
+        --font-body: "DM Sans", sans-serif;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-body);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* GRID BG */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(108, 99, 255, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(108, 99, 255, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      #root {
+        position: relative;
+        z-index: 1;
+      }
+
+      /* NAV */
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.2rem 2.5rem;
+        border-bottom: 1px solid var(--border);
+        background: rgba(10, 10, 15, 0.8);
+        backdrop-filter: blur(12px);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .nav-logo {
+        font-family: var(--font-display);
+        font-size: 1.3rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .nav-actions {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+      }
+
+      .badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+      .badge-admin {
+        background: rgba(108, 99, 255, 0.2);
+        color: var(--accent);
+        border: 1px solid rgba(108, 99, 255, 0.3);
+      }
+      .badge-user {
+        background: rgba(67, 233, 123, 0.1);
+        color: var(--accent3);
+        border: 1px solid rgba(67, 233, 123, 0.2);
+      }
+
+      /* BUTTONS */
+      .btn {
+        font-family: var(--font-body);
+        font-size: 0.875rem;
+        font-weight: 500;
+        padding: 0.6rem 1.25rem;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        letter-spacing: 0.01em;
+      }
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+      }
+      .btn-primary:hover:not(:disabled) {
+        background: #7c74ff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 20px rgba(108, 99, 255, 0.4);
+      }
+      .btn-ghost {
+        background: transparent;
+        color: var(--muted);
+        border: 1px solid var(--border);
+      }
+      .btn-ghost:hover:not(:disabled) {
+        color: var(--text);
+        border-color: var(--accent);
+      }
+      .btn-danger {
+        background: rgba(255, 101, 132, 0.1);
+        color: var(--accent2);
+        border: 1px solid rgba(255, 101, 132, 0.2);
+      }
+      .btn-danger:hover:not(:disabled) {
+        background: rgba(255, 101, 132, 0.2);
+      }
+      .btn-success {
+        background: rgba(67, 233, 123, 0.1);
+        color: var(--accent3);
+        border: 1px solid rgba(67, 233, 123, 0.2);
+      }
+      .btn-success:hover:not(:disabled) {
+        background: rgba(67, 233, 123, 0.2);
+      }
+      .btn-sm {
+        padding: 0.4rem 0.85rem;
+        font-size: 0.8rem;
+      }
+
+      /* LAYOUT */
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 2.5rem 2rem;
+      }
+
+      /* AUTH PAGE */
+      .auth-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+      }
+
+      .auth-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 420px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .auth-card::before {
+        content: "";
+        position: absolute;
+        top: -60px;
+        right: -60px;
+        width: 180px;
+        height: 180px;
+        background: radial-gradient(
+          circle,
+          rgba(108, 99, 255, 0.15),
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+
+      .auth-title {
+        font-family: var(--font-display);
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin-bottom: 0.4rem;
+        letter-spacing: -0.03em;
+      }
+
+      .auth-subtitle {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+      }
+
+      .tab-row {
+        display: flex;
+        gap: 0;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .tab {
+        flex: 1;
+        padding: 0.6rem;
+        background: transparent;
+        border: none;
+        color: var(--muted);
+        font-family: var(--font-body);
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .tab.active {
+        background: var(--accent);
+        color: #fff;
+        font-weight: 600;
+      }
+
+      .form-group {
+        margin-bottom: 1.1rem;
+      }
+      .form-label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: var(--muted);
+        margin-bottom: 0.4rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .form-input {
+        width: 100%;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 0.9rem;
+        transition: border-color 0.2s;
+        outline: none;
+      }
+      .form-input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+      }
+      .form-input::placeholder {
+        color: var(--muted);
+      }
+      select.form-input {
+        cursor: pointer;
+      }
+
+      /* ALERTS */
+      .alert {
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        margin-bottom: 1rem;
+      }
+      .alert-error {
+        background: rgba(255, 101, 132, 0.1);
+        border: 1px solid rgba(255, 101, 132, 0.2);
+        color: #ff8fa3;
+      }
+      .alert-success {
+        background: rgba(67, 233, 123, 0.1);
+        border: 1px solid rgba(67, 233, 123, 0.2);
+        color: var(--accent3);
+      }
+
+      /* DASHBOARD */
+      .page-header {
+        margin-bottom: 2rem;
+      }
+      .page-title {
+        font-family: var(--font-display);
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin-bottom: 0.3rem;
+      }
+      .page-sub {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .tabs-nav {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 0;
+      }
+      .tab-nav-item {
+        padding: 0.65rem 1.25rem;
+        background: none;
+        border: none;
+        color: var(--muted);
+        font-family: var(--font-body);
+        font-size: 0.875rem;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        transition: all 0.2s;
+        font-weight: 500;
+      }
+      .tab-nav-item.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+      }
+      .tab-nav-item:hover:not(.active) {
+        color: var(--text);
+      }
+
+      /* CARDS */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        transition: border-color 0.2s;
+      }
+      .card:hover {
+        border-color: rgba(108, 99, 255, 0.3);
+      }
+
+      .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.25rem;
+      }
+
+      .product-card {
+        position: relative;
+        overflow: hidden;
+      }
+      .product-card::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--accent), var(--accent2));
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+      .product-card:hover::after {
+        opacity: 1;
+      }
+
+      .product-id {
+        font-size: 0.7rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 0.5rem;
+      }
+      .product-title {
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 0.4rem;
+      }
+      .product-meta {
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-bottom: 1rem;
+      }
+      .product-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 999px;
+      }
+      .status-active {
+        background: rgba(67, 233, 123, 0.1);
+        color: var(--accent3);
+        border: 1px solid rgba(67, 233, 123, 0.2);
+      }
+      .status-inactive {
+        background: rgba(255, 101, 132, 0.1);
+        color: var(--accent2);
+        border: 1px solid rgba(255, 101, 132, 0.2);
+      }
+      .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+
+      .product-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+      }
+
+      /* EMPTY STATE */
+      .empty {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--muted);
+      }
+      .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.4;
+      }
+      .empty-text {
+        font-size: 0.95rem;
+      }
+
+      /* ADMIN PANEL */
+      .admin-section {
+        margin-bottom: 2rem;
+      }
+      .section-title {
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .section-title::before {
+        content: "";
+        width: 3px;
+        height: 1em;
+        background: var(--accent);
+        border-radius: 2px;
+        display: inline-block;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+
+      /* EVENTS LOG */
+      .event-log {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1rem;
+        max-height: 240px;
+        overflow-y: auto;
+        font-family: "Courier New", monospace;
+        font-size: 0.78rem;
+      }
+      .event-item {
+        padding: 0.4rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-start;
+      }
+      .event-item:last-child {
+        border-bottom: none;
+      }
+      .event-time {
+        color: var(--muted);
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .event-msg {
+        color: var(--accent3);
+      }
+      .event-empty {
+        color: var(--muted);
+        text-align: center;
+        padding: 1rem;
+      }
+
+      /* SPINNER */
+      .spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* DIVIDER */
+      .divider {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 1.5rem 0;
+      }
+
+      /* PRODUCT DETAIL MODAL */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(4px);
+        z-index: 200;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+      }
+      .modal {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 2rem;
+        width: 100%;
+        max-width: 500px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+      .modal-title {
+        font-family: var(--font-display);
+        font-size: 1.4rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+      }
+      .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+      }
+
+      .kv-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.875rem;
+      }
+      .kv-row:last-child {
+        border-bottom: none;
+      }
+      .kv-key {
+        color: var(--muted);
+      }
+      .kv-val {
+        font-weight: 500;
+      }
+
+      /* SCROLLBAR */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 3px;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .fade-in {
+        animation: fadeIn 0.3s ease forwards;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="text/babel">
+      const { useState, useEffect, useCallback } = React;
+
+      const API = "http://localhost:3009/api";
+
+      // ── API helpers ──────────────────────────────────────────────────────────────
+      async function apiFetch(path, opts = {}, token = null) {
+        const headers = {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        };
+        const res = await fetch(`${API}${path}`, { ...opts, headers });
+        const data = await res.json();
+        if (!data.isSuccess)
+          throw new Error(data.message || data.errors?.[0] || "Error");
+        return data.data;
+      }
+
+      // ── Auth Context ─────────────────────────────────────────────────────────────
+      function useAuth() {
+        const [token, setToken] = useState(() => localStorage.getItem("token"));
+        const [user, setUser] = useState(() => {
+          try {
+            return JSON.parse(localStorage.getItem("user"));
+          } catch {
+            return null;
+          }
+        });
+
+        const login = (t, u) => {
+          setToken(t);
+          setUser(u);
+          localStorage.setItem("token", t);
+          localStorage.setItem("user", JSON.stringify(u));
+        };
+        const logout = () => {
+          setToken(null);
+          setUser(null);
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+        };
+
+        const isAdmin = user?.roles?.some((r) => r.id === 3);
+        const isMerchant = user?.roles?.some((r) => r.id === 2);
+
+        return { token, user, login, logout, isAdmin, isMerchant };
+      }
+
+      // ── Event Log ────────────────────────────────────────────────────────────────
+      function useEventLog() {
+        const [events, setEvents] = useState([]);
+        const addEvent = useCallback((msg) => {
+          const time = new Date().toLocaleTimeString();
+          setEvents((prev) =>
+            [{ time, msg, id: Date.now() }, ...prev].slice(0, 20),
+          );
+        }, []);
+        return { events, addEvent };
+      }
+
+      // ── Components ───────────────────────────────────────────────────────────────
+      function Alert({ type, msg }) {
+        if (!msg) return null;
+        return <div className={`alert alert-${type}`}>{msg}</div>;
+      }
+
+      function Spinner() {
+        return <span className="spinner" />;
+      }
+
+      // ── Auth Page ────────────────────────────────────────────────────────────────
+      function AuthPage({ onLogin }) {
+        const [tab, setTab] = useState("login");
+        const [email, setEmail] = useState("");
+        const [password, setPassword] = useState("");
+        const [loading, setLoading] = useState(false);
+        const [error, setError] = useState("");
+        const [success, setSuccess] = useState("");
+
+        const handle = async () => {
+          setError("");
+          setSuccess("");
+          if (!email || !password) {
+            setError("Completá todos los campos");
+            return;
+          }
+          setLoading(true);
+          try {
+            if (tab === "login") {
+              const data = await apiFetch("/auth/login", {
+                method: "POST",
+                body: JSON.stringify({ email, password }),
+              });
+
+              const payload = JSON.parse(atob(data.accessToken.split(".")[1]));
+              // Fetch user profile with roles
+              const profile = await apiFetch(
+                "/user/profile",
+                {},
+                data.accessToken,
+              );
+              onLogin(data.accessToken, profile);
+            } else {
+              await apiFetch("/auth/register", {
+                method: "POST",
+                body: JSON.stringify({ email, password }),
+              });
+              setSuccess("¡Cuenta creada! Ya podés iniciar sesión.");
+              setTab("login");
+              setEmail("");
+              setPassword("");
+            }
+          } catch (e) {
+            setError(e.message);
+          }
+          setLoading(false);
+        };
+
+        return (
+          <div className="auth-wrapper">
+            <div className="auth-card fade-in">
+              <div className="auth-title">NestJS E-Commerce</div>
+              <div className="auth-subtitle">
+                Challenge Sr Fullstack — Event Driven
+              </div>
+
+              <div className="tab-row">
+                <button
+                  className={`tab ${tab === "login" ? "active" : ""}`}
+                  onClick={() => {
+                    setTab("login");
+                    setError("");
+                    setSuccess("");
+                  }}
+                >
+                  Iniciar Sesión
+                </button>
+                <button
+                  className={`tab ${tab === "register" ? "active" : ""}`}
+                  onClick={() => {
+                    setTab("register");
+                    setError("");
+                    setSuccess("");
+                  }}
+                >
+                  Registrarse
+                </button>
+              </div>
+
+              <Alert type="error" msg={error} />
+              <Alert type="success" msg={success} />
+
+              <div className="form-group">
+                <label className="form-label">Email</label>
+                <input
+                  className="form-input"
+                  type="email"
+                  placeholder="usuario@ejemplo.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handle()}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Contraseña</label>
+                <input
+                  className="form-input"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handle()}
+                />
+              </div>
+
+              <button
+                className="btn btn-primary"
+                style={{ width: "100%", marginTop: "0.5rem" }}
+                onClick={handle}
+                disabled={loading}
+              >
+                {loading ? (
+                  <Spinner />
+                ) : tab === "login" ? (
+                  "Entrar"
+                ) : (
+                  "Crear cuenta"
+                )}
+              </button>
+
+              <div
+                style={{
+                  marginTop: "1.25rem",
+                  padding: "0.875rem",
+                  background: "var(--surface2)",
+                  borderRadius: "8px",
+                  fontSize: "0.78rem",
+                  color: "var(--muted)",
+                }}
+              >
+                <strong style={{ color: "var(--text)" }}>Admin:</strong>{" "}
+                admin@admin.com / admin123
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      // ── Products Tab ─────────────────────────────────────────────────────────────
+      function ProductsTab({ token, isPrivileged, addEvent }) {
+        const [products, setProducts] = useState([]);
+        const [loading, setLoading] = useState(false);
+        const [searchId, setSearchId] = useState("");
+        const [selected, setSelected] = useState(null);
+        const [activating, setActivating] = useState(null);
+        const [error, setError] = useState("");
+
+        const fetchProduct = async (id) => {
+          if (!id) return;
+          setLoading(true);
+          setError("");
+          try {
+            const p = await apiFetch(`/product/${id}`, {}, token);
+            setProducts((prev) => {
+              const exists = prev.find((x) => x.id === p.id);
+              return exists
+                ? prev.map((x) => (x.id === p.id ? p : x))
+                : [...prev, p];
+            });
+            addEvent(
+              `📦 Producto #${p.id} cargado — "${p.title || "Sin título"}"`,
+            );
+          } catch (e) {
+            setError(e.message);
+          }
+          setLoading(false);
+        };
+
+        const activateProduct = async (id) => {
+          setActivating(id);
+          try {
+            await apiFetch(
+              `/product/${id}/activate`,
+              { method: "POST" },
+              token,
+            );
+            setProducts((prev) =>
+              prev.map((p) => (p.id === id ? { ...p, isActive: true } : p)),
+            );
+            addEvent(`✅ Evento emitido: product.activated — Producto #${id}`);
+          } catch (e) {
+            setError(e.message);
+          }
+          setActivating(null);
+        };
+
+        useEffect(() => {
+          fetchProduct(1);
+        }, []);
+
+        return (
+          <div className="fade-in">
+            <div
+              style={{
+                display: "flex",
+                gap: "0.75rem",
+                marginBottom: "1.5rem",
+                alignItems: "flex-end",
+              }}
+            >
+              <div className="form-group" style={{ margin: 0, flex: 1 }}>
+                <label className="form-label">Buscar producto por ID</label>
+                <input
+                  className="form-input"
+                  type="number"
+                  placeholder="ej: 1"
+                  value={searchId}
+                  onChange={(e) => setSearchId(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && fetchProduct(searchId)}
+                />
+              </div>
+              <button
+                className="btn btn-primary"
+                onClick={() => fetchProduct(searchId)}
+                disabled={loading}
+              >
+                {loading ? <Spinner /> : "Buscar"}
+              </button>
+            </div>
+
+            <Alert type="error" msg={error} />
+
+            {products.length === 0 ? (
+              <div className="empty">
+                <div className="empty-icon">📦</div>
+                <div className="empty-text">
+                  Buscá un producto por ID para visualizarlo
+                </div>
+              </div>
+            ) : (
+              <div className="product-grid">
+                {products.map((p) => (
+                  <div key={p.id} className="card product-card fade-in">
+                    <div className="product-id">Producto #{p.id}</div>
+                    <div className="product-title">
+                      {p.title || "Sin título"}
+                    </div>
+                    <div className="product-meta">
+                      {p.description || "Sin descripción"}
+                    </div>
+                    <span
+                      className={`product-status ${p.isActive ? "status-active" : "status-inactive"}`}
+                    >
+                      <span className="status-dot" />
+                      {p.isActive ? "Activo" : "Inactivo"}
+                    </span>
+                    <div className="product-actions">
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => setSelected(p)}
+                      >
+                        Ver detalles
+                      </button>
+                      {isPrivileged && !p.isActive && (
+                        <button
+                          className="btn btn-success btn-sm"
+                          onClick={() => activateProduct(p.id)}
+                          disabled={activating === p.id}
+                        >
+                          {activating === p.id ? <Spinner /> : "Activar"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {selected && (
+              <div className="modal-overlay" onClick={() => setSelected(null)}>
+                <div
+                  className="modal fade-in"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="modal-title">Producto #{selected.id}</div>
+                  {[
+                    ["Título", selected.title || "—"],
+                    ["Código", selected.code || "—"],
+                    ["Descripción", selected.description || "—"],
+                    ["Variación", selected.variationType || "—"],
+                    ["Estado", selected.isActive ? "✅ Activo" : "❌ Inactivo"],
+                    ["Merchant ID", selected.merchantId],
+                    [
+                      "Categoría",
+                      selected.category?.name || selected.categoryId,
+                    ],
+                    ["Creado", new Date(selected.createdAt).toLocaleString()],
+                  ].map(([k, v]) => (
+                    <div key={k} className="kv-row">
+                      <span className="kv-key">{k}</span>
+                      <span className="kv-val">{v}</span>
+                    </div>
+                  ))}
+                  {selected.about?.length > 0 && (
+                    <div
+                      className="kv-row"
+                      style={{ flexDirection: "column", gap: "0.4rem" }}
+                    >
+                      <span className="kv-key">Características</span>
+                      <ul
+                        style={{
+                          paddingLeft: "1rem",
+                          color: "var(--text)",
+                          fontSize: "0.85rem",
+                        }}
+                      >
+                        {selected.about.map((a, i) => (
+                          <li key={i}>{a}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <div className="modal-footer">
+                    <button
+                      className="btn btn-ghost"
+                      onClick={() => setSelected(null)}
+                    >
+                      Cerrar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      // ── Admin Tab ────────────────────────────────────────────────────────────────
+      function AdminTab({ token, addEvent }) {
+        // Assign Role
+        const [userId, setUserId] = useState("");
+        const [roleId, setRoleId] = useState("2");
+        const [assignLoading, setAssignLoading] = useState(false);
+        const [assignMsg, setAssignMsg] = useState({ type: "", text: "" });
+
+        const assignRole = async () => {
+          setAssignMsg({ type: "", text: "" });
+          if (!userId) {
+            setAssignMsg({ type: "error", text: "Ingresá un User ID" });
+            return;
+          }
+          setAssignLoading(true);
+          try {
+            await apiFetch(
+              "/role/assign",
+              {
+                method: "POST",
+                body: JSON.stringify({
+                  userId: parseInt(userId),
+                  roleId: parseInt(roleId),
+                }),
+              },
+              token,
+            );
+            setAssignMsg({
+              type: "success",
+              text: `✅ Evento emitido: role.assign.requested — User #${userId} → Rol ${roleId}`,
+            });
+            addEvent(
+              `🎭 Evento: role.assign.requested — User #${userId} recibió rol ID ${roleId}`,
+            );
+            setUserId("");
+          } catch (e) {
+            setAssignMsg({ type: "error", text: e.message });
+          }
+          setAssignLoading(false);
+        };
+
+        // Create Product
+        const [catId, setCatId] = useState("1");
+        const [createLoading, setCreateLoading] = useState(false);
+        const [createMsg, setCreateMsg] = useState({ type: "", text: "" });
+
+        const createProduct = async () => {
+          setCreateMsg({ type: "", text: "" });
+          setCreateLoading(true);
+          try {
+            const p = await apiFetch(
+              "/product/create",
+              {
+                method: "POST",
+                body: JSON.stringify({ categoryId: parseInt(catId) }),
+              },
+              token,
+            );
+            setCreateMsg({
+              type: "success",
+              text: `✅ Producto #${p.id} creado. Categría ID: ${catId}`,
+            });
+            addEvent(`📦 Producto #${p.id} creado (categoryId: ${catId})`);
+          } catch (e) {
+            setCreateMsg({ type: "error", text: e.message });
+          }
+          setCreateLoading(false);
+        };
+
+        return (
+          <div className="fade-in">
+            <div className="admin-section">
+              <div className="section-title">Asignar Rol</div>
+              <div className="card">
+                <p
+                  style={{
+                    fontSize: "0.82rem",
+                    color: "var(--muted)",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  El sistema usa eventos de dominio — al asignar un rol se emite{" "}
+                  <code style={{ color: "var(--accent)" }}>
+                    role.assign.requested
+                  </code>{" "}
+                  y el{" "}
+                  <code style={{ color: "var(--accent)" }}>
+                    NotificationsConsumer
+                  </code>{" "}
+                  lo procesa de forma asincrónica.
+                </p>
+                <Alert type={assignMsg.type} msg={assignMsg.text} />
+                <div className="form-row">
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">User ID</label>
+                    <input
+                      className="form-input"
+                      type="number"
+                      placeholder="ej: 3"
+                      value={userId}
+                      onChange={(e) => setUserId(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="form-label">Rol</label>
+                    <select
+                      className="form-input"
+                      value={roleId}
+                      onChange={(e) => setRoleId(e.target.value)}
+                    >
+                      <option value="1">1 — Customer</option>
+                      <option value="2">2 — Merchant</option>
+                      <option value="3">3 — Admin</option>
+                    </select>
+                  </div>
+                </div>
+                <button
+                  className="btn btn-primary"
+                  style={{ marginTop: "1rem" }}
+                  onClick={assignRole}
+                  disabled={assignLoading}
+                >
+                  {assignLoading ? <Spinner /> : "Asignar Rol"}
+                </button>
+              </div>
+            </div>
+
+            <div className="admin-section">
+              <div className="section-title">Crear Producto</div>
+              <div className="card">
+                <Alert type={createMsg.type} msg={createMsg.text} />
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label className="form-label">Category ID</label>
+                  <input
+                    className="form-input"
+                    type="number"
+                    placeholder="ej: 1"
+                    value={catId}
+                    onChange={(e) => setCatId(e.target.value)}
+                  />
+                </div>
+                <button
+                  className="btn btn-primary"
+                  style={{ marginTop: "1rem" }}
+                  onClick={createProduct}
+                  disabled={createLoading}
+                >
+                  {createLoading ? <Spinner /> : "Crear Producto"}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      // ── Event Log Tab ────────────────────────────────────────────────────────────
+      function EventLogTab({ events }) {
+        return (
+          <div className="fade-in">
+            <div className="card" style={{ marginBottom: "1.5rem" }}>
+              <div
+                style={{
+                  fontSize: "0.875rem",
+                  color: "var(--muted)",
+                  lineHeight: "1.6",
+                }}
+              >
+                El sistema implementa un patrón{" "}
+                <strong style={{ color: "var(--text)" }}>Event-Driven</strong>{" "}
+                con{" "}
+                <code style={{ color: "var(--accent)" }}>EventEmitter2</code>.
+                Los eventos se emiten de forma asincrónica y son procesados por
+                consumidores desacoplados. Este log refleja los eventos
+                disparados durante tu sesión.
+              </div>
+            </div>
+
+            <div style={{ marginTop: "1.5rem" }}>
+              <div className="section-title">Eventos implementados</div>
+              <div style={{ display: "grid", gap: "0.75rem" }}>
+                {[
+                  {
+                    event: "user.registered",
+                    trigger: "POST /auth/register",
+                    desc: "Se emite al crear una cuenta nueva. El consumer loguea el envío de email de bienvenida.",
+                  },
+                  {
+                    event: "auth.login",
+                    trigger: "POST /auth/login",
+                    desc: "Se emite al iniciar sesión. El consumer registra la actividad del usuario.",
+                  },
+                  {
+                    event: "role.assign.requested",
+                    trigger: "POST /role/assign",
+                    desc: "Se emite al asignar un rol. El NotificationsConsumer lo procesa y llama a UserService.assignRole().",
+                  },
+                  {
+                    event: "user.role-assigned",
+                    trigger: "Interno (UserService)",
+                    desc: "Se emite después de persistir el rol. Permite auditoría y notificaciones post-asignación.",
+                  },
+                  {
+                    event: "product.activated",
+                    trigger: "POST /product/:id/activate",
+                    desc: "Se emite al activar un producto. El consumer actualiza el catálogo visible para clientes.",
+                  },
+                ].map(({ event, trigger, desc }) => (
+                  <div key={event} className="card" style={{ padding: "1rem" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        marginBottom: "0.4rem",
+                        flexWrap: "wrap",
+                        gap: "0.5rem",
+                      }}
+                    >
+                      <code
+                        style={{ color: "var(--accent)", fontSize: "0.82rem" }}
+                      >
+                        {event}
+                      </code>
+                      <code
+                        style={{ color: "var(--muted)", fontSize: "0.75rem" }}
+                      >
+                        {trigger}
+                      </code>
+                    </div>
+                    <div style={{ fontSize: "0.82rem", color: "var(--muted)" }}>
+                      {desc}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      // ── Main App ─────────────────────────────────────────────────────────────────
+      function App() {
+        const { token, user, login, logout, isAdmin, isMerchant } = useAuth();
+        const { events, addEvent } = useEventLog();
+        const [activeTab, setActiveTab] = useState("products");
+
+        if (!token) return <AuthPage onLogin={login} />;
+
+        const tabs = [
+          { id: "products", label: "📦 Productos" },
+          { id: "events", label: "⚡ Eventos" },
+          ...(isAdmin || isMerchant
+            ? [{ id: "admin", label: "⚙️ Admin" }]
+            : []),
+        ];
+
+        return (
+          <div>
+            <nav className="nav">
+              <div className="nav-logo">E-Commerce</div>
+              <div className="nav-actions">
+                <span style={{ fontSize: "0.85rem", color: "var(--muted)" }}>
+                  {user?.email}
+                </span>
+                <button className="btn btn-ghost btn-sm" onClick={logout}>
+                  Salir
+                </button>
+              </div>
+            </nav>
+
+            <div className="container">
+              <div className="page-header">
+                <div className="page-title">Dashboard</div>
+              </div>
+
+              <div className="tabs-nav">
+                {tabs.map((t) => (
+                  <button
+                    key={t.id}
+                    className={`tab-nav-item ${activeTab === t.id ? "active" : ""}`}
+                    onClick={() => setActiveTab(t.id)}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+
+              {activeTab === "products" && (
+                <ProductsTab
+                  token={token}
+                  isPrivileged={isAdmin || isMerchant}
+                  addEvent={addEvent}
+                />
+              )}
+              {activeTab === "events" && <EventLogTab events={events} />}
+              {activeTab === "admin" && (isAdmin || isMerchant) && (
+                <AdminTab token={token} addEvent={addEvent} />
+              )}
+            </div>
+          </div>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    </script>
+  </body>
+</html>
