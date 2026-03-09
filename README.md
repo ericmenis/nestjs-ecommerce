@@ -39,6 +39,20 @@ Implementación **event-driven** usando `@nestjs/event-emitter`:
 `RoleService` → emite evento → `NotificationsConsumer` escucha → llama a `UserService`
 Ahora los módulos dependen de eventos, no unos de otros.
 
+## Sistema de Eventos
+
+Todos los eventos están definidos en `src/domain/events/`.
+
+| Evento                  | Dónde se emite                       | Quién escucha           | Descripción                                      |
+| ----------------------- | ------------------------------------ | ----------------------- | ------------------------------------------------ |
+| `user.registered`       | `AuthService` al registrar           | `NotificationsConsumer` | Simula envío de email de bienvenida              |
+| `auth.login`            | `AuthService` al hacer login         | `NotificationsConsumer` | Registra el acceso del usuario                   |
+| `role.assign.requested` | `RoleService` al asignar rol         | `NotificationsConsumer` | Dispara la asignación real del rol al usuario    |
+| `user.role-assigned`    | `UserService` tras asignar el rol    | `NotificationsConsumer` | Confirma que el rol fue asignado correctamente   |
+| `product.activated`     | `ProductService` al activar producto | `NotificationsConsumer` | Simula notificación de actualización de catálogo |
+
+---
+
 # Ecommerce App with Nest.js and Postgres
 
 ## Description
