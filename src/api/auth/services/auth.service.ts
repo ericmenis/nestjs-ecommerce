@@ -5,20 +5,20 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { RoleIds } from 'src/api/role/enum/role.enum';
-import { RoleService } from 'src/api/role/services/role.service';
 import { CreateUserDto } from 'src/api/user/dto/user.dto';
 import { UserService } from 'src/api/user/services/user.service';
 import { errorMessages } from 'src/errors/custom';
 import { PayloadDto } from '../dto/auth.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { UserLoggedInEvent } from 'src/domain/events/user.events';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
-    private readonly roleService: RoleService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async login(user: CreateUserDto) {
@@ -33,6 +33,11 @@ export class AuthService {
     );
     if (!isValidPassword)
       throw new UnauthorizedException(errorMessages.auth.wronCredentials);
+
+    this.eventEmitter.emit(
+      'auth.login',
+      new UserLoggedInEvent(alreadyExistingUser.id, email, new Date()),
+    );
     return this.generateToken({
       id: alreadyExistingUser.id,
       email,
@@ -43,14 +48,7 @@ export class AuthService {
     const alreadyExistingUser = await this.userService.findByEmail(user.email);
     if (alreadyExistingUser)
       throw new ConflictException(errorMessages.auth.userAlreadyExist);
-
-    const customerRole = await this.roleService.findById(RoleIds.Customer);
-
-    await this.userService.createUser(user, customerRole);
-
-    return {
-      message: 'success',
-    };
+    return this.userService.registerNewCustomer(user);
   }
 
   async generateToken(payload: PayloadDto) {

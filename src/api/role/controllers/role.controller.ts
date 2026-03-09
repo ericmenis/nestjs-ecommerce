@@ -11,6 +11,6 @@ export class RoleController {
   @Auth(RoleIds.Admin)
   @Post('assign')
   async assignRoleToUser(@Body() body: AssignRoleDto) {
-    return this.roleService.assignRoleToUser(body);
+    return this.roleService.assignRole(body);
   }
 }

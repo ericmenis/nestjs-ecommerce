@@ -6,10 +6,11 @@ import { UserModule } from './user/user.module';
 import { RoleModule } from './role/role.module';
 import { ProductModule } from './product/product.module';
 import { ErrorsFilter } from 'src/errors/errors.filter';
-
+import { NotificationsConsumer } from './notificantion/notifications.consumer';
 @Module({
   imports: [AuthModule, UserModule, RoleModule, ProductModule],
   providers: [
+    NotificationsConsumer,
     {
       provide: APP_INTERCEPTOR,
       useClass: SucessResponseInterceptor,
