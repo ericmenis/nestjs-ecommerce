@@ -1,3 +1,44 @@
+# E-Commerce Backend - NestJS
+
+## Descripción del Proyecto
+
+Este es un backend de e-commerce desarrollado en NestJS que fue refactorizado para mejorar su arquitectura, eliminando acoplamiento entre módulos e implementando un sistema event-driven.
+
+## Problemas Encontrados
+
+### 1. Acoplamiento Circular entre Módulos
+
+**Situación inicial:**
+
+- `UserModule` dependía de `RoleModule`
+- `RoleModule` dependía de `UserModule`
+- `AuthModule` dependía de ambos Esto causaba errores de inyección de dependencias
+
+### 2. Responsabilidades Mezcladas
+
+- `RoleService` llamaba directamente a `UserService` para asignar roles
+- `UserService` necesitaba `RoleService` solo para buscar un rol en el registro
+
+## Soluciones Implementadas (SOLID)
+
+### Principio Single Responsibility
+
+- `UserService` solo maneja operaciones de usuario
+- `RoleService` solo maneja lógica de roles
+- Los eventos comunican entre ellos
+
+### Principio Open/Closed
+
+Implementación **event-driven** usando `@nestjs/event-emitter`:
+
+- Los módulos emiten eventos en lugar de llamarse directamente
+- Nuevos listeners pueden agregarse sin modificar código existente
+
+### Dependency Inversion
+
+`RoleService` → emite evento → `NotificationsConsumer` escucha → llama a `UserService`
+Ahora los módulos dependen de eventos, no unos de otros.
+
 # Ecommerce App with Nest.js and Postgres
 
 ## Description
